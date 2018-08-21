@@ -4,7 +4,7 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "http-server -a 0.0.0.0 -p $PORT -c-1"
+    "test": "http-server"
   },
   "author": "",
   "license": "ISC",
