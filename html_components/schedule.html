@@ -1,34 +1,135 @@
+<!-- 
+  <script src="../js/jquery-3.2.1.min.js"></script>
+  <link rel="stylesheet" href="../css/bootstrap.css" />
+  <script src="../js/bootstrap.min.js"></script> -->
+<div data-ng-init='fetchSchedules()' style="min-height:200px;" >
+    <a href="/?#!/addSchedule"> <button class="btn btn-info" > Add Schedule </button></a>
+    <!-- <h3 data-ng-if="showLoading" style="margin-left:30%;margin-top:100px;position: absolute;background-color: white;padding: 20px;
+      border-radius: 10px;
+    " >Just a moment, fetching files...</h3> -->
+    <div data-ng-if="showLoading">
+        <div class="loader"></div>
+        <style>
+            .loader {
+border: 16px solid #f3f3f3; /* Light grey */
+border-top: 16px solid #3498db; /* Blue */
+border-radius: 50%;
+border-bottom: 16px solid blue;
+margin-left: 45%;
+width: 80px;
+margin-top: 100px;
+height: 80px;
+-webkit-animation: spin 2s linear infinite;
+  animation: spin 2s linear infinite;
+}
 
-<table>
+@-webkit-keyframes spin {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+        </style>
+</div>
+    <div style="border:2px solid #352c2c;border-radius: 10px;padding: 10px;margin-right: 30%;" data-ng-repeat="sc in sched" >
+        <p>consignmentid : {{sc.consignmentid}}</p>
+        <p>userregtime : {{sc.userregtime}}</p>
+        <p>indentcomm : {{sc.indentcomm}}</p>
+        <p>indenttrain : {{sc.indenttrain}}</p>
+        <p>indentwagon : {{sc.indentwagon}}</p>
+        <p>username : {{sc.username}}</p>
+        <p>srcstncode : {{sc.srcstncode}}</p> 
+        <p>srcdeptime : {{sc.srcdeptime}}</p> 
+        <p>disttravel : {{sc.disttravel}}</p> 
+        <p>destarrivaltime : {{sc.destarrivaltime}}</p> 
+        <p>deststncode : {{sc.deststncode}}</p> 
+        <p>unload_strt_time : {{sc.unload_strt_time}}</p> 
+        <p>unload_end_time : {{sc.unload_end_time}}</p><br>
+    </div>
+
+<!-- <div>
+  
+  <div class="container">
+   <div class="table-responsive">
+    <h1 align="center">JNPT Schedule Details</h1>
+    <table >
     <thead>
-        <th>CONSIGNMENT ID</th>
-        <th>INDENT COMMODITY</th>
-        <th>INDENT TYPE OF TRAIN</th>
-        <th>INDENT NO OF WAGONS</th>
-        <th>LOADING START TIME</th>
-        <th>LOADING END TIME</th>
-        <th>DEPARTURE TIME</th>
-        <th>DISTANCE TRAVELLED</th>
-        <th>DESTINATION STATION CODE</th>
-        <th>DESTINATION STATION CODE</th>
-    </thead>
-    <tbody>
+    <tr>
+      <th>CONSIGNMENT ID</th>
+      <th>USER REG TIME</th>
+      <th>INDENT COMMODITY</th>
+      <th>INDENT TYPE OF TRAIN</th>
+      <th>INDENT NO OF WAGONS</th>
+      <th>LOAD START TIME</th>
+      <th>LOAD END TIME</th>
+      <th>JNPT DEPARTURE TIME</th>
+      <th>DISTANCE TRAVELLED </th>
+      <th>DEST. CODE</th>
+      <th>DEST. ARRIVAL TIME</th>
 
-    </tbody>
+    </tr>
+  </thead>
+  
+    </table>
+    <br />
+    <div align="center">
+     <button type="button" name="load_data" id="load_data" class="btn btn-info">Load Data</button>
+    </div>
+    <br />
+    <div id="info_table">
 
-</table>
+    </div>
+   </div>
+  </div>
+ 
+ <script>
+$(document).ready(function(){
+ $('#load_data').click(function(){
+  $('#load_data').hide();
+  $.ajax({
+   url:"info.csv",
+   dataType:"text",
+   success:function(data)
+   {
 
-
-
-<script>
-    d3.csv('../info.csv', (e, data) => {
-        if(e) throw e;
-        console.warn('d3 working');
-        // while(1){
-
-        // }
-        console.debug(data[0][1]);
-        tableRow = document.createElement('td')
-
-    });
+    var info_data = data.split(/\r?\n|\r/);
+    var table_data = '<table class="table table-bordered table-striped">';
+    for(var count = 0; count<info_data.length; count++)
+    {
+     var cell_data = info_data[count].split(",");
+     table_data += '<tr>';
+     for(var cell_count=0; cell_count<cell_data.length; cell_count++)
+     {
+      if(count === 0)
+      {
+       table_data += '<th>'+cell_data[cell_count]+'</th>';
+      }
+      else
+      {
+       table_data += '<td>'+cell_data[cell_count]+'</td>';
+      }
+     }
+     table_data += '</tr>';
+    }
+    table_data += '</table>';
+    $('#info_table').html(table_data);
+   }
+  });
+   });
+ 
+});
 </script>
+</div> -->
+</div>
+ 
+<style>
+p{
+  padding: 0px;
+  margin: 0px;
+  color: black;
+  font-weight: 300;
+}
+</style>

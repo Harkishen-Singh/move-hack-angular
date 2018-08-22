@@ -8,11 +8,54 @@
         <button class="btn btn-primary" id="addRail" onclick="onRail();">Rail Line</button>
         <button class="btn btn-primary" id="addTrans" onclick="onTruck();">Truck Transport</button>
         <button class="btn btn-success" onclick='' id='done' >Done</button>
+    
         
         <p id="showTag" style="color: black;" > Tag :   
         </p>
         <div style="background-image: url('../images_of_ports/nhavasheva.png');width: 100%;min-height: 800px;background-repeat: no-repeat;" id="main" >
-        <div id="elementCreator" >
+            <!-- <h3 data-ng-if="showLoading" style="margin-left:30%;margin-top:100px;position: absolute;background-color: white;padding: 20px; -->
+                <div data-ng-if="showLoading">
+                        <div class="loader"></div>
+                        <style>
+                            .loader {
+    border: 16px solid #f3f3f3; /* Light grey */
+    border-top: 16px solid #3498db; /* Blue */
+    border-bottom: 16px solid blue;
+    border-radius: 50%;
+    margin-left: 45%;
+    width: 80px;
+    margin-top: 100px;
+    height: 80px;position: absolute;
+    -webkit-animation: spin 2s linear infinite;
+  animation: spin 2s linear infinite;
+}
+
+@-webkit-keyframes spin {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+                        </style>
+                </div>
+      <!-- border-radius: 10px;
+    " >Just a moment, fetching files...</h3> -->
+            <div id="elementCreator" >
+            <div data-ng-if=" tags.length>0 " >
+                <div data-ng-repeat="t in tags" >
+                    <button style="margin-left:{{t.marginLeft}};margin-top:{{t.marginTop}};position: absolute;
+                        color:#fff;background-color:red;font-size:10px;padding:1px;font-weight:bold;border-radius:4px;
+                        " > 
+                        {{t.name+', '+t.type}}
+                    </button><br/>
+                    <p data-ng-if="t.capacity!=null" style="margin-left:{{t.marginLeft}};margin-top:{{t.marginTop}};position: absolute;
+                    font-size:10px;color:red;
+                    " >capacity : {{t.capacity}} </p>
+                </div>
+            </div>
                 
         </div>  
         
@@ -22,6 +65,44 @@
         
         <script>
 
+class Tagshandler {
+    constructor(){
+        this.Tags = [];
+        this.tag = {
+            'username':'',
+            'name':'',
+            'type':'',
+            'capacity':'',
+            'marginLeft':'',
+            'marginTop':'',
+        };
+    }
+    pushTag(username,name,type,capacity,marginLeft,marginTop){
+        this.tag = {
+            'username':'',
+            'name':'',
+            'type':'',
+            'capacity':'',
+            'marginLeft':'',
+            'marginTop':'',
+        };
+        this.tag.username = username
+        this.tag.name = name
+        this.tag.type = type
+        this.tag.capacity = capacity
+        this.tag.marginLeft=marginLeft
+        this.tag.marginTop=marginTop
+        this.Tags.push(this.tag);
+        this.displayAll();
+    }
+    displayAll(){
+        console.warn(this.Tags);
+    }
+    throwObject(){
+        return this.Tags;
+    }
+}
+var obj = new Tagshandler();
         
             $(document).ready(() => {
                 $('#cancel').hide();
@@ -65,7 +146,7 @@
                 $('#done').click(()=>{
                     $.ajax({
                         url:'http://0.0.0.0:5000/addTags2',
-                        data: JSON.stringify(obj.throwObject())  ,
+                        data: 'object=' +JSON.stringify(obj.throwObject())  ,
                         success: function(r,status){
                             console.warn('ajax request with result: '+r+' status: '+status);
                         },
@@ -83,43 +164,7 @@
                     $('#done').hide();
                 })
             });
-class Tagshandler {
-    constructor(){
-        this.Tags = [];
-        this.tag = {
-            'username':'',
-            'name':'',
-            'type':'',
-            'capacity':'',
-            'marginLeft':'',
-            'marginTop':'',
-        };
-    }
-    pushTag(username,name,type,capacity,marginLeft,marginTop){
-        this.tag = {
-            'username':'',
-            'name':'',
-            'type':'',
-            'capacity':'',
-            'marginLeft':'',
-            'marginTop':'',
-        };
-        this.tag.username = username
-        this.tag.name = name
-        this.tag.type = type
-        this.tag.capacity = capacity
-        this.tag.marginLeft=marginLeft
-        this.tag.marginTop=marginTop
-        this.Tags.push(this.tag);
-        this.displayAll();
-    }
-    displayAll(){
-        console.warn(this.Tags);
-    }
-    throwObject(){
-        return this.Tags;
-    }
-}
+
 var testObj = {
     name:'singh',
 }
@@ -131,7 +176,7 @@ function boo(){
 
 
 
-var obj = new Tagshandler();
+
             var dock_count = 0,warehouse_count=0,railline_count=0,truck_count=0;
             function onDock() {
                 ++dock_count;

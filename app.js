@@ -32,9 +32,14 @@ app.config(function($routeProvider,$locationProvider) {
         controller:'signUpcontroller',
         title:'Dashboard',
     })
+    .when('/addSchedule', {
+        templateUrl:'./html_components/scheduleform.html',
+        controller:'scheduleController',
+        title:'Dashboard',
+    })
 })
 
-app.controller('loginController', function($scope,$location,$rootScope) {
+app.controller('loginController', function($scope,$location,$rootScope,$http) {
     console.warn('login page called')
     $scope.showHeader = false;
     $rootScope.settingsOption = false;
@@ -42,16 +47,42 @@ app.controller('loginController', function($scope,$location,$rootScope) {
     $scope.wrongpass = '';
     $rootScope.showSidebar = false;
     $scope.checkLogin =  function() {
-        if($scope.password=='1') {
-            console.warn('logged in')
-            $scope.wrongpass = 'Success';
-            $rootScope.showSidebar = true;
-            $location.path('/dashboard');
+
+        $http(
+            {url:global.url+'/login',
+            method:'POST',
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            data:'username='+$scope.username+'&password='+$scope.password}
+        )
+        .then(resp=>{
+            res=resp.data;
+            if(res['Success']=='Y'){
+                console.warn('logged in')
+                global.username = $scope.username;
+                $scope.wrongpass = 'Success';
+                $rootScope.showSidebar = true;
+                global.username = 'test';
+                $location.path('/dashboard');
+            }
+            else{
+                $scope.wrongpass = 'Wrong Password or Username entered'
+            }
+        })
+
+
+        // if($scope.password=='1' && $scope.username=='test') {
+        //     console.warn('logged in')
+        //     $scope.wrongpass = 'Success';
+        //     $rootScope.showSidebar = true;
+        //     global.username = 'test';
+        //     $location.path('/dashboard');
             
-        }
-        else {
-            $scope.wrongpass = 'Wrong Password entered'
-        }
+        // }
+        // else {
+        //     $scope.wrongpass = 'Wrong Password or Username entered'
+        // }
     }
 })
 
@@ -61,16 +92,90 @@ app.controller('dashController', function($scope,$rootScope){
     $rootScope.settingsOption = true;
 })
 
-app.controller('scheduleController', function($scope,$rootScope){
+app.controller('scheduleController', function($scope,$rootScope,$http,$location){
     console.warn('scheduleController called')
     $rootScope.showSidebar = true;
+    $scope.addinit = function() {
+        console.warn('addinit called');
+        
+        $scope.codes = ['JNPT' ,'DD', 'TICD', 'CWCJ', 'BNGD', 'PNCS', 'CSTN', 'CCMP', 'ICDD', 'CCTB', 'GRFV', 'KTIG', 'ICDM', 'ACDA', 'MKPP', 'CCTA',
+             'CGPT', 'MATP', 'DCCS', 'CRNM', 'HTPP', 'CMCT', 'CKYR', 'ICMB', 'GDGH', 'ICDY', 'ICBD', 'ICDG', 'MLSW', 'CWCN', 'MRWN', 'DLIB',
+              'ICDK', 'RICD', 'CRCC', 'MILK', 'HTSD', 'IBBM', 'DRTA', 'KIFH',
+             'DICD', 'ICDS', 'CMLK', 'CRTK', 'HZL', 'LNN', 'CGDM', 'NTSJ', 'DGFJ', 'BTBR'];
+    }
+    $scope.fetchSchedules = function() {
+        $scope.showLoading = true;
+        $http({
+            url:global.url+'/schedules',
+            method:'POST',
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            data:'username='+global.username
+        })
+        .then(resp => {
+            res = resp.data;
+            if(res['Success']=='Y') {
+                $scope.sched = res['result'];
+                $scope.showLoading=false;
+            }
+        })
+    }
+    $scope.addScheduleCont = function(){
+        let data = '&consignmentid='+$scope.schedule_form.consignmentid+'&userregtime='+$scope.schedule_form.userregtime+'&indentcomm='+$scope.schedule_form.indentcomm
+            +'&indenttrain='+$scope.schedule_form.indenttrain+'&indentwagon='+$scope.schedule_form.indentwagon+
+            '&srcstncode='+$scope.schedule_form.srcstncode+'&srcdeptime='+$scope.schedule_form.srcdeptime+'&disttravel='+$scope.schedule_form.disttravel+'&deststncode='+$scope.schedule_form.deststncode+
+            '&destarrivaltime'+$scope.schedule_form.destarrivaltime+'&unload_strt_time='+$scope.schedule_form.unload_strt_time+'&unload_end_time='+$scope.schedule_form.unload_end_time;
+            $scope.result='';
+
+        
+
+        $http({
+            url:global.url+'/addSchedules',
+            method:'POST',
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            data:'username='+global.username+data
+        })
+        .then(resp=>{
+            let res = resp.data;
+            if(res['Success']=='Y'){
+                $scope.result = 'Added Successfully!'
+                $location.path('/schedules')
+            }
+            else
+            $scope.result = 'Some Error occured'
+        })
+    }
 })
 
-app.controller('mapGenController', function($scope,$rootScope){
+app.controller('mapGenController', function($scope,$rootScope,$http){
     console.warn('mapGenController called')
     $rootScope.showSidebar = true;
+    $scope.showLoading = true;
     $scope.initialise = function(){
         console.warn('init called');
+        $http({
+            url:global.url+'/retriveTags',
+            method:'POST',
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            data:'username='+global.username
+        })
+        .then(resp=>{
+            let res = resp.data;
+            if(res['Success']=='Y'){
+                console.warn(res['result']);
+                $scope.showLoading = false;
+                $scope.tags = res['result'];
+            }
+            else{
+                console.error('some err occurred while retriving tags');
+                
+            }
+        })
     }
     $scope.tagDockSubmit = function(){
         console.warn('reached dock submit')

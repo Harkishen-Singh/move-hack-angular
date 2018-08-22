@@ -1,0 +1,66 @@
+<div class="" style="" data-ng-init="addinit()"
+>
+    
+    <form action="" style="" data-ng-submit="addScheduleCont()" >
+        <h3>Schedule details of the ship </h3><hr>
+
+        Consignment Id : <input type="number" style="background-color: #F6FFFF;border-radius: 10px;text-align: center;margin-top: 20px;"
+            ng-model="schedule_form.consignmentid" 
+        /><br/><br/>
+        User Indent Reg. Time : <input type="datetime-local" style="background-color: #F6FFFF;border-radius: 10px;text-align: center;margin-top: 20px;"
+            ng-model="schedule_form.userregtime" 
+        /><br/><br/>
+        Indent Commodity :<select ng-model="schedule_form.indentcomm"  style="background-color:white;border-radisu:5px;">
+            <option value="CONT" style="background-color:white;border-radisu:5px;" >CONT</option>
+            <option value="EOIL" style="background-color:white;border-radisu:5px;">EOIL</option>
+            </select><br/><br/>
+        Indent Type Of Train : <select ng-model="schedule_form.indenttrain"  style="background-color:white;border-radisu:5px;">
+            <option value="CONT" style="background-color:white;border-radisu:5px;">CONT</option>
+            <option value="TANK" style="background-color:white;border-radisu:5px;">TANK</option>
+            </select><br/><br/>
+        Indent No. Of Wagons : <input type="number" style="background-color: #F6FFFF;border-radius: 10px;text-align: center;margin-top: 20px;"
+            ng-model="schedule_form.indentwagon" 
+        /><br/><br/>
+        Source Station Code : 
+        <input list="codes2"  data-ng-model="schedule_form.srcstncode">
+        <datalist id="codes2" >
+            <option  data-ng-repeat="c in codes" value="{{c}}">{{c}}</option>
+        </datalist><br><br>
+        <!-- <input type="text" style="background-color: #F6FFFF;border-radius: 10px;text-align: center;margin-top: 20px;"
+            ng-model="schedule_form.srcstncode" 
+        /><br/><br/> -->
+        Source Departure Time : <input type="datetime-local" style="background-color: #F6FFFF;border-radius: 10px;text-align: center;margin-top: 20px;"
+            ng-model="schedule_form.srcdeptime" 
+        /><br/><br/>
+        Distance Travelled : <input type="number" style="background-color: #F6FFFF;border-radius: 10px;text-align: center;" 
+        data-ng-model="schedule_form.disttravel"
+        /><br/><br/>
+        Dest. Station Code : 
+        <input list="codes2"  data-ng-model="schedule_form.deststncode">
+        <datalist id="codes2" >
+            <option  data-ng-repeat="c in codes" value="{{c}}">{{c}}</option>
+        </datalist><br><br>
+        <!-- <input type="text" style="background-color: #F6FFFF;border-radius: 10px;text-align: center;" 
+        data-ng-model="schedule_form.deststncode"
+        /><br/><br/> -->
+        Dest. Arrival Time : <input type="datetime-local" style="background-color: #F6FFFF;border-radius: 10px;text-align: center;" 
+        data-ng-model="schedule_form.destarrivaltime"
+        /><br/><br/>
+
+        Unloading Start Time : <input type="datetime-local" style="background-color: #F6FFFF;border-radius: 10px;text-align: center;" 
+        data-ng-model="schedule_form.unload_strt_time"
+        /><br/><br/>
+
+        Unloading End Time : <input type="datetime-local" style="background-color: #F6FFFF;border-radius: 10px;text-align: center;" 
+        data-ng-model="schedule_form.unload_end_time"
+        /><br/><br/>
+        
+        <input type="submit" class="btn btn-primary" /> <a href="/?#!/schedules">
+                <button class="btn btn-danger" style="margin-left:20px;" >Cancel</button>
+        </a> 
+       
+        
+    </form>
+    
+    
+</div>
