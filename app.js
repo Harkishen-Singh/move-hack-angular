@@ -1,13 +1,24 @@
 var app = angular.module('pt_management', ['ngRoute']);
 
 var global = {
-    url:'http://127.0.0.1:5000',
+    url:'http://0.0.0.0:5000',
     username:'test',
+    map:'',
 }
 
 app.config(function($routeProvider,$locationProvider) {
     $routeProvider
-    .when('/',{
+    .when('/#!/%3F%23!',{
+        templateUrl:'./html_components/login.html',
+        controller:'loginController',
+        title:'Login | SignUp',
+    })
+    .when("/",{
+        templateUrl:'./html_components/login.html',
+        controller:'loginController',
+        title:'Login | SignUp',
+    })
+    .when("/login",{
         templateUrl:'./html_components/login.html',
         controller:'loginController',
         title:'Login | SignUp',
@@ -37,17 +48,102 @@ app.config(function($routeProvider,$locationProvider) {
         controller:'scheduleController',
         title:'Dashboard',
     })
+    .when('/assignees', {
+        templateUrl:'./html_components/assignee.html',
+        controller:'asssigneeController',
+        title:'Assignees'
+    })
+    .when('/addAssignee', {
+        templateUrl:'./html_components/assigneeForm.html',
+        controller:'asssigneeController',
+        title:'Assignees'
+    })
+})
+
+app.controller('asssigneeController', function($scope,$location,$rootScope,$http) {
+    console.warn('assignee controller called')
+    $rootScope.showSidebar = true;
+    $rootScope.settingsOption = true;
+    $scope.addAssignee = function() {
+        let data = 'username='+$scope.assignee_form.username+'&password='+$scope.assignee_form.password
+            +'&name='+$scope.assignee_form.name+'&master='+global.username+'&task='+$scope.assignee_form.task
+        $http(
+            {url:global.url+'/assigneeAdd',
+            method:'POST',
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            data:data}
+        )
+        .then(resp=>{
+            res=resp.data;
+            if(res['Success']=='Y'){
+                $scope.wrongpass = 'Success';
+                $rootScope.showSidebar = true;
+                setTimeout($location.path('/assignees'),2000)
+            }
+            else{
+                $scope.wrongpass = 'Error occurred while Adding assignee'
+            }
+        })
+
+    }
+    $scope.retriveAssignees = function(){
+        $scope.showLoading = true;
+        $http(
+            {url:global.url+'/assignee',
+            method:'POST',
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            data:'master='+global.username
+        }
+        )
+        .then(resp=>{
+            res=resp.data;
+            if(res['Success']=='Y'){
+                $scope.showLoading = false;
+                $scope.ass = res['result'];
+            }
+            else{
+                console.error('error occurred while requesting for asignee list')
+                $scope.showLoading = false;
+            }
+        })
+    }
+    $scope.removeAss = function(username) {
+        $http(
+            {url:global.url+'/delAssignee',
+            method:'POST',
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            data:'master='+global.username+'&username='+username
+        }
+        )
+        .then(resp=>{
+            res=resp.data;
+            if(res['Success']=='Y'){
+                alert('Removed Assignee '+username+'. Refresh to see the effect.');
+            }
+            else{
+                alert('Error Removing Assignee '+username);
+            }
+        })
+    } 
 })
 
 app.controller('loginController', function($scope,$location,$rootScope,$http) {
     console.warn('login page called')
+    // $location.path('/login')
     $scope.showHeader = false;
     $rootScope.settingsOption = false;
     $scope.title = 'Login | SignUP'
     $scope.wrongpass = '';
     $rootScope.showSidebar = false;
-    $scope.checkLogin =  function() {
-
+    $scope.checkLogin =  function(v) {
+        console.warn(v);
+        $scope.showLoader=true;
         $http(
             {url:global.url+'/login',
             method:'POST',
@@ -59,42 +155,258 @@ app.controller('loginController', function($scope,$location,$rootScope,$http) {
         .then(resp=>{
             res=resp.data;
             if(res['Success']=='Y'){
+                $scope.showLoader=false;
+                $location.path('/dashboard');
                 console.warn('logged in')
                 global.username = $scope.username;
                 $scope.wrongpass = 'Success';
                 $rootScope.showSidebar = true;
-                global.username = 'test';
-                $location.path('/dashboard');
+
+                
             }
             else{
                 $scope.wrongpass = 'Wrong Password or Username entered'
+                $scope.showLoader=false;
             }
         })
-
-
-        // if($scope.password=='1' && $scope.username=='test') {
-        //     console.warn('logged in')
-        //     $scope.wrongpass = 'Success';
-        //     $rootScope.showSidebar = true;
-        //     global.username = 'test';
-        //     $location.path('/dashboard');
-            
-        // }
-        // else {
-        //     $scope.wrongpass = 'Wrong Password or Username entered'
-        // }
     }
 })
 
-app.controller('dashController', function($scope,$rootScope){
+
+app.controller('dashController', function($scope,$rootScope,$http){
+    let finalLenghtsArr = [];
+    $scope.fetchAssignee = function(){
+        console.warn('fetch assignee called')
+        $http(
+            {url:global.url+'/assignee',
+            method:'POST',
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            data:'master='+global.username
+        }
+        )
+        .then(resp=>{
+            res=resp.data;
+            if(res['Success']=='Y'){
+                $scope.assss2 = res['result'];
+                console.warn('assignees below')
+                console.warn(res['result'])
+            }
+            else{
+                console.error('error occurred while requesting for asignee list')
+                $scope.showLoading = false;
+            }
+        })
+    }
+
+    $scope.defaultDistances = function() {
+        var allTags = [];
+        console.warn('defaultDistances called');
+        $http({
+            url:global.url+'/retriveTags',
+            method:'POST',
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            data:'username='+global.username
+        })
+        .then(resp=>{
+            let res = resp.data;
+            if(res['Success']=='Y'){
+                // console.warn(res['result']);
+                // $scope.showLoading = false;
+                // $scope.tags = res['result'];
+                allTags = res['result'];
+                let donePorts=[];
+        let lengths = [];
+        
+        for(i=0;i<allTags.length;i++){
+
+            for(j=i+1;j<allTags.length-1;j++) {
+                let xP1 = allTags[i]['marginLeft'],yP1=allTags[i]['marginTop'],
+                    xP2 = allTags[j]['marginLeft'],yP2=allTags[j]['marginTop'];
+                let lenObj = {
+                        'station1':'',
+                        'station2':'',
+                        'station1Type':'',
+                        'station2Type':'',
+                        'xpixels':'',
+                        'ypixels':'',
+                        'distance':'',
+                    }
+                xDiff = Math.abs(parseFloat(xP1.substr(0,xP1.length-2)) - parseFloat(xP2.substr(0,xP2.length-2))) ; 
+                yDiff = Math.abs(parseFloat(yP1.substr(0,yP1.length-2)) - parseFloat(yP2.substr(0,yP2.length-2))) ; 
+                sqsX = xDiff*xDiff;
+                sqsY = yDiff*yDiff;
+                distPx = Math.sqrt(sqsX+sqsY);
+                dist = distPx * 5;
+                lenObj.station1Type = allTags[i]['type'];
+                lenObj.station2Type = allTags[j]['type'];
+                lenObj.station1 = allTags[i]['name'];
+                lenObj.station2 = allTags[j]['name'];
+                lenObj.xpixels = xDiff;
+                lenObj.ypixels = yDiff;
+                lenObj.distance = dist.toFixed(1); 
+                lengths.push(lenObj);
+            }
+        }
+        for(o=0;o<lengths.length;o++) {
+            if(!((lengths[o]['station1Type'] == 'Passenger' || lengths[o]['station1Type'] == 'Cargo' || lengths[o]['station1Type'] == 'Others') 
+            &&
+            (lengths[o]['station2Type'] == 'Passenger' || lengths[o]['station2Type'] == 'Cargo' || lengths[o]['station2Type'] == 'Others'))
+            ){
+                finalLenghtsArr.push(lengths[o]);
+            }
+        }
+        $scope.distances = finalLenghtsArr;
+        console.log(finalLenghtsArr)
+            }
+            else{
+                console.error('some err occurred while retriving tags');
+                
+            }
+        })
+        
+    }
+    // defaultDistances();
+
+    $scope.assigneeParticular = function(username, consignmentid) {
+        console.warn(username+' '+consignmentid)
+        $http({
+            url:global.url+'/assigneeParticular',
+            method:'POST',
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            data:'master='+global.username+'&username='+username+'&id='+consignmentid
+        })
+        .then(resp => {
+            res = resp.data;
+            if(res['Success']=='Y') {
+                alert('Schedule with consignment ID : '+consignmentid+' has been assigned Dock : '+username)
+            }
+            else{
+                alert('Failed to Assign Dock')
+            }
+        })
+    }
+    
+    $scope.assignDock = function(name,id) {
+        $http({
+            url:global.url+'/assignDock',
+            method:'POST',
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            data:'username='+global.username+'&id='+id+'&name='+name
+        })
+        .then(resp => {
+            res = resp.data;
+            if(res['Success']=='Y') {
+                alert('Schedule with consignment ID : '+id+' has been assigned Dock : '+name)
+            }
+            else{
+                alert('Failed to Assign Dock')
+            }
+        })
+    }
+
     console.warn('dashboard controller called')
     $rootScope.showSidebar = true;
     $rootScope.settingsOption = true;
+    $scope.showNone = true;
+    $scope.fetchSchedules = function() {
+        $scope.showLoading1 = true;
+        
+        $http({
+            url:global.url+'/schedules',
+            method:'POST',
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            data:'username='+global.username
+        })
+        .then(resp => {
+            res = resp.data;
+            if(res['Success']=='Y') {
+                $scope.sched = res['result'];
+                $scope.showLoading1=false;
+            }
+        })
+    }
+    $scope.assigneInit = function (id) {
+        console.warn('assigne called')
+
+    }
+    $scope.fetchSchDetails = function(id) {
+        console.warn('fetchSchDetails called id:'+id)
+        $scope.showLoading2 = true;
+
+        $http({
+            url:global.url+'/dockDetails',
+            method:'POST',
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            data:'username='+global.username
+        })
+        .then(resp => {
+            res = resp.data;
+            if(res['Success']=='Y') {
+                console.warn('dock details below');
+                console.warn(res['result'])
+                $scope.docks = res['result'];
+            }
+        })
+
+        $http({
+            url:global.url+'/scheduleDetails',
+            method:'POST',
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            data:'consignmentid='+id
+        })
+        .then(resp => {
+            res = resp.data;
+            if(res['Success']=='Y') {
+                console.warn('schedule details below')
+                console.warn(res['result'])
+                $scope.sc = res['result'];
+                $scope.showNone=false;
+                $scope.showLoading2=false;
+            }
+        })
+    }
+
 })
 
 app.controller('scheduleController', function($scope,$rootScope,$http,$location){
     console.warn('scheduleController called')
     $rootScope.showSidebar = true;
+
+    $scope.deleteSchd = function(id){
+        console.warn('delete schedule called');
+        $http({
+            url:global.url+'/delSchedule',
+            method:'POST',
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            data:'id='+id
+        })
+        .then(resp => {
+            res = resp.data;
+            if(res['Success']=='Y') {
+                alert('Schedule with consignment ID : '+id+' is removed successfully. Refresh to see the effect')
+            }
+            else{
+                alert('Error removing Schedule with consignment ID : '+id)
+            }
+        })
+    }
+
     $scope.addinit = function() {
         console.warn('addinit called');
         
@@ -123,9 +435,9 @@ app.controller('scheduleController', function($scope,$rootScope,$http,$location)
     }
     $scope.addScheduleCont = function(){
         let data = '&consignmentid='+$scope.schedule_form.consignmentid+'&userregtime='+$scope.schedule_form.userregtime+'&indentcomm='+$scope.schedule_form.indentcomm
-            +'&indenttrain='+$scope.schedule_form.indenttrain+'&indentwagon='+$scope.schedule_form.indentwagon+
+            +'&indenttrain='+$scope.schedule_form.indenttrain+'&indentwagon='+$scope.schedule_form.indentwagon+'&type='+$scope.schedule_form.type+
             '&srcstncode='+$scope.schedule_form.srcstncode+'&srcdeptime='+$scope.schedule_form.srcdeptime+'&disttravel='+$scope.schedule_form.disttravel+'&deststncode='+$scope.schedule_form.deststncode+
-            '&destarrivaltime'+$scope.schedule_form.destarrivaltime+'&unload_strt_time='+$scope.schedule_form.unload_strt_time+'&unload_end_time='+$scope.schedule_form.unload_end_time;
+            '&destarrivaltime='+$scope.schedule_form.destarrivaltime+'&unload_strt_time='+$scope.schedule_form.unload_strt_time+'&unload_end_time='+$scope.schedule_form.unload_end_time;
             $scope.result='';
 
         

@@ -1,15 +1,246 @@
-<div class="container">
-    <div class="row">
-        <div class="col-md-6" style="border-right:4px solid #f5f5f5;min-height:800px">
-            your schedules of ship timings will appear here
+<script src="https://d3js.org/d3.v5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/c3/0.6.7/c3.css"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/c3/0.6.7/c3.js"></script>
+
+<div class="container" data-ng-init="fetchSchedules();defaultDistances();">
+    <div class="row" >
+        <div class="col-md-6" style="border-right:4px solid #f5f5f5;height:1000px;overflow-y: auto;"  >
+            <div data-ng-if="showLoading1">
+                <div class="loader"></div>
+                <style>
+                    .loader {
+        border: 16px solid #f3f3f3; /* Light grey */
+        border-top: 16px solid #3498db; /* Blue */
+        border-radius: 50%;
+        border-bottom: 16px solid blue;
+        margin-left: 45%;
+        width: 60px;
+        margin-top: 100px;
+        height: 60px;
+        -webkit-animation: spin 2s linear infinite;
+          animation: spin 2s linear infinite;
+        }
+        
+        @-webkit-keyframes spin {
+          0% { -webkit-transform: rotate(0deg); }
+          100% { -webkit-transform: rotate(360deg); }
+        }
+        
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+                </style>
         </div>
+            <!-- <h3>Details Of the Upcoming Ship</h3> -->
+            <div id="display" style="border:2px solid #352c2c;background-color: #FAFEFD;
+            border-radius: 10px;margin-right: 5%;margin-bottom: 20px;padding-top: 10px;padding-bottom: 20px;" 
+            data-ng-repeat="sc in sched" data-ng-click="fetchSchDetails(sc.consignmentid);fetchAssignee();" >
+            <button data-ng-if="sc.type=='incoming' || sc.type=='' || sc.type==null" 
+            style="background-color:yellow;padding:5px;color:black;border-radius: 5px;display: inline;margin-left: 10px;" 
+            >Incoming</button>  
+            <button data-ng-if="sc.type=='outgoing'" style="background-color:red;margin-left: 10px;padding:5px;color:#fff;border-radius: 5px;" >Outgoing</button>  
+                <h4 style="text-align:center;">Schedule {{$index + 1}}</h4><hr/>
+                <p><b >Consignment Id: </b> {{sc.consignmentid}}
+                <b style="margin-left:40px;">Indent Commodity: </b> {{sc.indentcomm}}</p>
+                <p><b >Indent Type Of Train: </b>  {{sc.indenttrain}}
+                <b style="margin-left:40px;">Indent Number of Wagons: </b> {{sc.indentwagon}}</p>
+                <p><b >Source Station Code: </b> {{sc.srcstncode}}
+                <b style="margin-left:40px;">Destination Station Code :</b> {{sc.deststncode}}</p> 
+              </div>
+
+        </div>
+
+
         <div class="col-md-6">
-            <div style="height:50%;border-bottom:4px solid #f5f5f5" >
-                specific schedule details and recommendations will appear here
+            <div style="height:33%;border-bottom:4px solid #f5f5f5"  >
+                    <div data-ng-if="showLoading1">
+                            <div class="loader"></div>
+                            <style>
+                                .loader {
+                    border: 16px solid #f3f3f3; /* Light grey */
+                    border-top: 16px solid #3498db; /* Blue */
+                    border-radius: 50%;
+                    border-bottom: 16px solid blue;
+                    margin-left: 45%;
+                    width: 60px;
+                    margin-top: 100px;
+                    height: 60px;
+                    -webkit-animation: spin 2s linear infinite;
+                      animation: spin 2s linear infinite;
+                    }
+                    
+                    @-webkit-keyframes spin {
+                      0% { -webkit-transform: rotate(0deg); }
+                      100% { -webkit-transform: rotate(360deg); }
+                    }
+                    
+                    @keyframes spin {
+                      0% { transform: rotate(0deg); }
+                      100% { transform: rotate(360deg); }
+                    }
+                            </style>
+                    </div>
+                
+                <div id= "display" data-ng-repeat="d in distances" style="overflow-y:auto; font-size: 12px;" >
+                    {{d.station1}} <sup>( {{d.station1Type}} )</sup> m 
+                    to {{d.station2}} <sup>( {{d.station2Type}} ) </sup> m 
+                     distance : {{d.distance}} m
+                </div>
             </div>
-            <div>
-                your graphs will appear here
+            <div style="height:33%;border-bottom:4px solid #f5f5f5;overflow-y: auto;" >
+
+                <div data-ng-if="showLoading2">
+                    <div class="loader"></div>
+                    <style>
+                        .loader {
+            border: 16px solid #f3f3f3; /* Light grey */
+            border-top: 16px solid #3498db; /* Blue */
+            border-radius: 50%;
+            border-bottom: 16px solid blue;
+            margin-left: 45%;
+            width: 60px;
+            margin-top: 100px;
+            height: 60px;
+            -webkit-animation: spin 2s linear infinite;
+              animation: spin 2s linear infinite;
+            }
+            
+            @-webkit-keyframes spin {
+              0% { -webkit-transform: rotate(0deg); }
+              100% { -webkit-transform: rotate(360deg); }
+            }
+            
+            @keyframes spin {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+                    </style>
+            </div>
+
+            <div data-ng-if="!showNone" ><p><b style="color: blue;">User Registration Time:</b>  {{sc.userregtime.substr(0,25)}} </p>
+               <p><b style="color: blue;">Username: </b> {{sc.username}}</p>
+                <p><b style="color: blue;">Source Station Code: </b> {{sc.srcstncode}}</p>
+                <p><b style="color: blue;">Source Departure Time: </b> {{sc.srcdeptime.substr(0,25)}}</p> 
+                <p><b style="color: blue;">Distance Travelled: </b>  {{sc.disttravel}}</p>
+                <p><b style="color: blue;">Destination Arrival Time :</b> {{sc.destarrivaltime.substr(0,25)}}</p> 
+                <p><b style="color: blue;">Unload Start Time : </b> {{sc.unload_strt_time.substr(0,25)}}</p>
+                <p><b style="color: blue;">Unload End Time :</b> {{sc.unload_end_time.substr(0,25)}}</p>
+                <p><b style="color: blue;">Dock :</b> {{sc.dockassigned}}</p>
+                <p><b style="color: blue;">Completed :</b> {{sc.completed}}</p>
+                <p><b style="color: blue;">Assignee :</b> {{sc.assignee}}</p>
+                <div data-ng-if="sc.dockassigned=='' || sc.dockassigned==null" >
+                   <p> <b style="color: blue;">Assign a Dock to this schedule :</b>  </p>
+                <!-- <input list="codes2"  data-ng-model="dockAss">
+                <datalist id="codes2" >
+                    <option  data-ng-repeat="c in docks" value="{{c.name}}">Name : {{c.name}} Type : {{c.type}}
+
+                        <button class="btn btn-success" data-ng-click="assignDock(c.name,sc.consignmentid)" >Assign</button>
+                    </option>
+                </datalist>   -->
+                <div data-ng-repeat="c in docks" value="{{c.name}}" >
+                        Name : {{c.name}} Type : {{c.type}}
+                        <button class="btn btn-success" data-ng-click="assignDock(c.name,sc.consignmentid)" 
+                            style="padding-top:0px;padding-bottom:0px"
+                        >Assign</button> <br><br>
+                    
+                </div>
+                
+                <br><br></div>
+                <div data-ng-if="true" >
+                   <span style="color:blue;" > Assignees available :</span> <br>
+                    <div data-ng-repeat="a in assss2" style="color:black" data-ng-if="a.username!=sc.assignee" >
+                        Username : {{a.username}} <button data-ng-click="assigneeParticular(a.username,sc.consignmentid)" 
+                        style="background-color:white;border-radius: 5px;" >Add</button> &nbsp; &nbsp;
+                    </div>
+                </div>
+                </div>
+
+                
+            </div>
+
+
+            <div id="chart">
+                <canvas id="LineChart">
+                    
+                </canvas>
             </div>
         </div>
     </div>
 </div>
+<style>
+    p{
+        padding-left: 20px;
+        margin: 0px;
+    }
+    sup{
+        color: blue;
+    }
+    
+</style>
+
+<!-- <script>
+        var chart = c3.generate({
+            bindto: '#chart',
+            data: {
+              columns: [
+                ['data1', 30, 200, 100, 400, 150, 250],
+                ['data2', 50, 20, 10, 40, 15, 25]
+              ]
+            }
+        });
+    
+</script> -->
+
+<script>
+var ctx = document.getElementById("LineChart").getContext('2d');
+var chart = c3.generate({
+    data: {
+        columns: [
+            ['date', 30, 200, 100, 400, 150, 250],
+            ['ship_departure', 50, 20, 10, 40, 15, 25]
+        ]
+    },
+    axis: {
+      y: {
+        label: {
+          text: 'ship_arrival   /   ship_departure',
+          position: 'outer-middle'
+        },
+
+      },
+      x:{
+        label:{
+            text:'date',
+            position :'outer-middle'
+        }
+      }
+  }
+});
+
+setTimeout(function () {
+    chart.load({
+        columns: [
+            ['date', 230, 190, 300, 500, 300, 400]
+        ]
+    });
+}, 1000);
+
+setTimeout(function () {
+    chart.load({
+        columns: [
+            ['ship_arrival', 130, 150, 200, 300, 200, 100]
+        ]
+    });
+}, 1500);
+
+setTimeout(function () {
+    chart.unload({
+        ids: 'date'
+    });
+}, 2000);
+window.onbeforeunload = e => {
+    e.preventDefault();
+    return 'you cannot refresh';
+}
+</script>
